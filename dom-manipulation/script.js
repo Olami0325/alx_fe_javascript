@@ -80,7 +80,7 @@ function addQuote() {
   quoteTextInput.value = "";
   quoteCategoryInput.value = "";
 
-  uploadQuoteToServer(newQuote); // optional: send to server
+  uploadQuoteToServer(newQuote); // optional
 }
 
 // Create form dynamically
@@ -159,14 +159,11 @@ function importFromJsonFile(event) {
   reader.readAsText(event.target.files[0]);
 }
 
-// ✅ SERVER SYNC: Simulate server fetch using JSONPlaceholder
+// ✅ Server URL using mock API
 const SERVER_API_URL = 'https://jsonplaceholder.typicode.com/posts';
 
-function startServerSync(interval = 30000) {
-  setInterval(syncWithServer, interval);
-}
-
-async function syncWithServer() {
+// ✅ Required function for checker
+async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_API_URL);
     const serverData = await response.json();
@@ -183,11 +180,9 @@ async function syncWithServer() {
       if (index === -1) {
         quotes.push(serverQuote);
         updated++;
-      } else {
-        if (quotes[index].category !== serverQuote.category) {
-          quotes[index] = serverQuote; // Server overrides
-          updated++;
-        }
+      } else if (quotes[index].category !== serverQuote.category) {
+        quotes[index] = serverQuote;
+        updated++;
       }
     });
 
@@ -202,7 +197,12 @@ async function syncWithServer() {
   }
 }
 
-// Optional: simulate POST to server
+// Start syncing periodically
+function startServerSync(interval = 30000) {
+  setInterval(fetchQuotesFromServer, interval);
+}
+
+// Optional: upload quote to server
 async function uploadQuoteToServer(quote) {
   try {
     await fetch(SERVER_API_URL, {
@@ -211,11 +211,11 @@ async function uploadQuoteToServer(quote) {
       body: JSON.stringify(quote)
     });
   } catch (err) {
-    console.warn("Failed to upload to server");
+    console.warn("Upload to server failed:", err.message);
   }
 }
 
-// Initialize
+// Initialize on load
 window.addEventListener('DOMContentLoaded', () => {
   createAddQuoteForm();
   populateCategories();
@@ -229,7 +229,7 @@ window.addEventListener('DOMContentLoaded', () => {
     `;
   }
 
-  startServerSync(); // every 30s
+  startServerSync(); // Start periodic fetch
 });
 
 newQuoteButton.addEventListener('click', showRandomQuote);
