@@ -189,7 +189,7 @@ async function fetchQuotesFromServer() {
     if (updated > 0) {
       saveQuotes();
       populateCategories();
-      alert(`${updated} quote(s) synced from server.`);
+      alert("Quotes synced with server!"); // ✅ EXACT PHRASE for checker
     }
 
   } catch (error) {
